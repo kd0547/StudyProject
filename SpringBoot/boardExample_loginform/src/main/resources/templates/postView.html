@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">게시글 제목</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <style>
+        .post-container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .post-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .post-meta {
+            font-size: 14px;
+            color: #666;
+        }
+        .post-content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .post-footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #333;
+            text-align: center;
+        }
+        .action-buttons {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .action-buttons input[type="submit"] {
+            padding: 8px 16px;
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .action-buttons input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        h1 {
+            text-align: center;
+        }
+        .new-post {
+            text-align: center;
+            margin: 20px;
+        }
+        /* 페이징 영역 가로 정렬 및 중앙 정렬 */
+        .pagination {
+            text-align: center;
+            margin: 20px;
+        }
+        .pagination ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto;
+            display: inline-block;
+        }
+        .pagination ul li {
+            display: inline;
+            margin: 0 5px;
+        }
+        .pagination ul li a,
+        .pagination ul li span {
+            display: inline-block;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            text-decoration: none;
+            color: #333;
+        }
+        .pagination ul li span {
+            background-color: #ddd;
+            font-weight: bold;
+        }
+        .comments-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+    </style>
+</head>
+<body>
+<div class="post-container">
+    <div class="post-header">
+        <div class="post-title" th:text="${post.title}">게시글 제목</div>
+        <div class="post-meta">
+            작성자: <span th:text="${post.author}">작성자</span> |
+            작성일: <span th:text="${#temporals.format(post.createAt, 'yyyy-MM-dd HH:mm')}">작성일</span> |
+            조회수: <span th:text="${post.viewCount}">0</span>
+        </div>
+    </div>
+    <div class="post-content" th:text="${post.subject}">
+        게시글 내용이 여기에 표시됩니다.
+    </div>
+    <!-- 좋아요 버튼 추가 -->
+    <div class="action-buttons">
+        <button id="like-button" type="button" th:attr="data-post-id=${post.id}, data-likes-count=${post.like}"  th:text="${ '좋아요 ' + post.like}">좋아요</button>
+    </div>
+
+</div>
+
+
+<!-- 댓글 기능 추가 -->
+<div class="comments-container mt-4">
+    <h4>Comments</h4>
+    <div class="comment-form">
+        <input type="text" id="comment-author" class="form-control mb-2" placeholder="작성자">
+        <textarea id="comment-content" class="form-control mb-2" placeholder="댓글을 입력하세요"></textarea>
+        <button id="submit-comment" class="btn btn-primary">댓글 작성</button>
+    </div>
+
+    <div class="comments-list mt-3" th:if="${post.comments != null and not #lists.isEmpty(post.comments)}">
+        <ul class="list-group" id="comment-list">
+            <li class="list-group-item" th:each="comment : ${post.comments}">
+                <strong th:text="${comment.author}">작성자</strong>
+                <span class="text-muted" th:text="${#temporals.format(comment.createAt, 'yyyy-MM-dd HH:mm')}">작성일</span>
+                <p th:text="${comment.comment}">댓글 내용</p>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th style="width:50px">조회수</th>
+        <th>제목</th>
+        <th style="width:50px">좋아요</th>
+        <th>작성자</th>
+        <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody id="api-board">
+    <!-- 게시글 목록을 반복 -->
+    </tbody>
+</table>
+
+<!-- 페이징 네비게이션 (10개씩 페이지 번호 표시) -->
+<div  class="pagination">
+    <ul id="paginationId">
+
+    </ul>
+</div>
+<span style="display: none" id="page-data" th:attr="page-data=${page}"></span>
+<script>
+    function createBoardList(data,pageId) {
+        const boardList = data.boardList
+        const boardTable = document.getElementById("api-board")
+        boardList.forEach(function (data) {
+            var tr = document.createElement("tr");
+
+            // ID 셀 생성
+            var id = document.createElement("td");
+            id.innerText = data.id;
+
+            // 조회수 셀 생성
+            var view = document.createElement("td");
+            view.innerText = data.viewCount;
+
+            // 제목 셀 생성
+            var title = document.createElement("td");
+            var titleA = document.createElement("a")
+            titleA.href = "/post/"+data.id+"?page="+ pageId;
+            titleA.innerText = data.title;
+            title.appendChild(titleA);
+
+
+
+            var like = document.createElement("td");
+            like.innerText = data.like;
+
+            var author = document.createElement("td");
+            author.innerText = data.author;
+
+            // 작성일 추가 (필요 시)
+            var dateTd = document.createElement("td");
+            var date = new Date(data.createAt);
+            var dateString = date.getFullYear() + "-" +
+                ("0" + (date.getMonth() + 1)).slice(-2) + "-" +
+                ("0" + date.getDate()).slice(-2) + " " +
+                ("0" + date.getHours()).slice(-2) + ":" +
+                ("0" + date.getMinutes()).slice(-2) + ":" +
+                ("0" + date.getSeconds()).slice(-2);
+
+            dateTd.innerText = dateString;
+
+
+            tr.appendChild(id);
+            tr.appendChild(view);
+            tr.appendChild(title);
+            tr.appendChild(like);
+            tr.appendChild(author);
+            tr.appendChild(dateTd);
+
+            boardTable.appendChild(tr);
+        });
+    }
+
+    function createPagenation(data) {
+        var totalPage = data.page.totalPage;
+        var currentPage = data.page.number;
+        var startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+        var endPage = startPage + 9;
+        console.log(startPage);
+        console.log(currentPage);
+        console.log(endPage);
+
+        if(totalPage > 1) {
+            var pagination = document.getElementById("paginationId")
+
+            if(startPage > 1) {
+                var prev = document.createElement("li");
+                var prevA = document.createElement("a")
+                prevA.href = "/list?page=" + (startPage - 1);
+                prevA.innerText = "이전";
+
+                prev.appendChild(prevA);
+                pagination.appendChild(prev);
+            }
+
+            for(startPage; startPage <= endPage; startPage++)  {
+                var pli = document.createElement("li");
+
+                if(startPage === currentPage) {
+                    var pspan = document.createElement("span");
+                    pspan.innerText = startPage.toString();
+                    pli.appendChild(pspan);
+                    pagination.appendChild(pli)
+                } else {
+                    var p = document.createElement("a");
+                    p.href = "/list?page=" + startPage;
+                    p.innerText = startPage.toString();
+
+                    pli.appendChild(p);
+                    pagination.appendChild(pli);
+                }
+            }
+
+            if(endPage < totalPage - 1) {
+                var next = document.createElement("li");
+                var nextA = document.createElement("a");
+                nextA.href = "/list?page=" + (endPage + 1);
+                nextA.innerText = "다음";
+
+                next.appendChild(nextA);
+                pagination.appendChild(next);
+
+            }
+        }
+    }
+
+
+    document.addEventListener("DOMContentLoaded",function () {
+        var pageId = document.getElementById("page-data").getAttribute("page-data");
+        fetch("/list?page="+pageId, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        }).then(function (response) {
+            if(!response.ok) {
+                throw new Error("네트워크 응답이 정상적이지 않습니다.");
+            }
+            return response.json();
+        }).then(function (data) {
+            createBoardList(data,pageId);
+            createPagenation(data);
+        })
+    })
+
+
+    document.getElementById("like-button").addEventListener('click', function() {
+        var postId = this.getAttribute("data-post-id");
+        var dataPostId = document.getElementById("like-button");
+        var likesCount = parseInt(dataPostId.getAttribute("data-likes-count"), 10);
+
+        fetch("/post/"+postId+"/like", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+            .then(function (response) {
+                if(!response.ok) {
+                    throw new Error("네트워크 응답이 정상적이지 않습니다.");
+                }
+                likesCount++;
+                dataPostId.setAttribute("data-likes-count",likesCount);
+                document.getElementById("like-button").innerText = "좋아요 " + likesCount;
+                }
+            )
+            .catch(function(error) {
+                console.error("좋아요 처리 중 에러 발생:", error);
+            });
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password    # 루트 계정 비밀번호 설정
+      MYSQL_DATABASE: study_db            # 기본 생성할 데이터베이스 이름
+      MYSQL_USER: study_user              # 새로 생성할 사용자 이름
+      MYSQL_PASSWORD: study_password      # 사용자 비밀번호 설정
+    ports:
+      - "3307:3306"                        # 호스트와 컨테이너의 포트 매핑

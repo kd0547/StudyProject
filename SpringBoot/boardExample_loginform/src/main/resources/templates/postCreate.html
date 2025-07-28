@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>새 게시글 작성</title>
+    <style>
+        form {
+            width: 60%;
+            margin: 30px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+<h1 style="text-align: center;">새 게시글 작성</h1>
+<form th:action="@{/board/new}" method="post" th:object="${boardDto}">
+    <!-- CSRF 토큰 -->
+    <input type="hidden" th:if="${_csrf != null}"
+           th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+    <label for="title">제목</label>
+    <input type="text" id="title" th:field="*{title}" placeholder="게시글 제목을 입력하세요" required />
+
+    <label for="subject">내용</label>
+    <textarea id="subject" th:field="*{subject}" rows="10" placeholder="게시글 내용을 입력하세요" required></textarea>
+
+    <label for="author">작성자</label>
+    <input readonly type="text" id="author" th:field="*{author}" placeholder="작성자 이름" required />
+
+    <button type="submit">등록하기</button>
+</form>
+</body>
+</html>

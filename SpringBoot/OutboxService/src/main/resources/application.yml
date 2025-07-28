@@ -1,0 +1,32 @@
+server:
+  port: 8084
+
+
+spring:
+  application:
+    name: OutboxService
+
+  datasource:
+    url: jdbc:mysql://localhost:3307/test_db
+    username: test_user
+    password: test_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+      hibernate.show_sql: true
+      hibernate.format_sql: true
+  kafka:
+    bootstrap-servers: localhost:9093
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+    consumer:
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+

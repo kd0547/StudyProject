@@ -1,0 +1,45 @@
+
+services:
+  # 테스트용 DB
+  mysql_test:
+    image: mysql:8.0
+    container_name: mysql_test
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+    ports:
+      - "3307:3306"  # 로컬에서 3307 포트로 접근 가능
+    volumes:
+      - ./mysql/conf.d:/etc/mysql/conf.d  # 설정 파일 마운트
+      - ./mysql/data:/var/lib/mysql       # 데이터 지속성
+    restart: always
+
+  # 프로덕션용 DB
+  mysql_prod:
+    image: mysql:8.0
+    container_name: mysql_prod
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: prod_db
+      MYSQL_USER: prod_user
+      MYSQL_PASSWORD: prod_password
+    ports:
+      - "3308:3306"  # 로컬에서 3308 포트로 접근 가능
+
+    restart: always
+
+  # 공부용 DB
+  mysql_study:
+    image: mysql:8.0
+    container_name: mysql_study
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: study_db
+      MYSQL_USER: study_user
+      MYSQL_PASSWORD: study_password
+    ports:
+      - "3309:3306"  # 로컬에서 3308 포트로 접근 가능
+
+    restart: always

@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: boardExample
+
+
+  datasource:
+    username: test_user
+    password: test_password
+    url: jdbc:mysql://localhost:3307/test_db
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 20
+      idle-timeout: 600000          # 10분 동안 사용 안 하면 커넥션 제거 (기본 10분)
+      max-lifetime: 1800000         # 커넥션의 최대 수명 (기본 30분)
+      connection-timeout: 30000     # 커넥션 가져올 때 대기 최대 시간 (기본 30초)
+      validation-timeout: 5000      # 커넥션 유효성 검사 타임아웃 (기본 5초)
+      keepalive-time: 300000        # 커넥션 유지 시에도 주기적으로 ping (기본 비활성화)
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        hibernate.generate_statistics: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  logging:
+    level:
+      root: info
+      org.springframework.dao: debug
+      org.hibernate.exception: debug
+      org.hibernate.engine.jdbc.spi.SqlExceptionHelper: debug
+      org.hibernate.resource.transaction: debug
+      org.hibernate.SQL: debug
+      org.hibernate.type.descriptor.sql: trace
+      org.hibernate.stat: debug
+
+
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      linger-ms: 1
+      buffer-memory: 33554432
+    bootstrap-servers: localhost:9092

@@ -1,0 +1,63 @@
+spring:
+  profiles:
+    active: dev  # 'dev' 프로파일을 활성화
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+  application:
+    name: demo
+
+  datasource:
+    url: jdbc:mysql://localhost:3307/test_db
+    username: test_user
+    password: test_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+      hibernate.show_sql: true
+      hibernate.format_sql: true
+#  kafka:
+#    bootstrap-servers: kafka:9092
+#
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#
+#    consumer:
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+    name: demo
+
+  datasource:
+    url: jdbc:mysql://localhost:3308/prod_db
+    username: prod_user
+    password: prod_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+      hibernate.show_sql: true
+      hibernate.format_sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

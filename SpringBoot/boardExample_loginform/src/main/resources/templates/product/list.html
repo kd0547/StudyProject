@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>상품 페이지 - 장바구니 예시</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            margin: 0 auto;
+            border-collapse: separate;
+            border-spacing: 20px 15px;
+            table-layout: fixed;
+        }
+        td {
+            vertical-align: top;
+        }
+        .product-container {
+            width: 200px;
+            height: 400px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            margin: auto;
+        }
+        .product-image {
+            width: 100%;
+            height: 45%;
+            background-color: #3498db;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .product-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .product-description {
+            font-size: 12px;
+            color: #555;
+            flex-grow: 1;
+            overflow: auto;
+            margin-bottom: 4px;
+        }
+        .product-price {
+            font-size: 14px;
+            color: #e74c3c;
+            font-weight: bold;
+            text-align: right;
+        }
+        .add-to-cart-btn {
+            margin-top: 8px;
+            padding: 6px 10px;
+            background-color: #2ecc71;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .add-to-cart-btn:hover {
+            background-color: #27ae60;
+        }
+        .view-cart-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 8px 16px;
+            background-color: #f39c12;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .view-cart-btn:hover {
+            background-color: #d35400;
+        }
+
+
+        .order-btn {
+            margin-top: 8px;
+            padding: 6px 10px;
+            background-color: #2ecccc;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .order-btn:hover {
+            background-color: #27b2b2;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- 장바구니 보기 버튼 (장바구니 담긴 상품 개수 표시) -->
+<button class="view-cart-btn" id="viewCartBtn" onclick="showCart()">장바구니 보기 (<span id="cartCount">0</span>)</button>
+<button class="view-cart-btn" id="submitBtn" onclick="showCart()">주문하기</button>
+
+<table>
+    <tr th:each="r : ${#numbers.sequence(0,row - 1)}">
+        <td th:each="c : ${#numbers.sequence(0, col - 1)}">
+            <div th:with="index=${r * col + c}" >
+                <div class="product-container"
+                     th:attr="product-id=${productList[index].id}">
+                    <div class="product-image"></div>
+                    <div class="product-name" th:text="${productList[index].name}">상품명 1</div>
+                    <div class="product-description" th:text="${productList[index].description}">상품 설명 1</div>
+                    <div class="product-price" th:text="${'$ ' + productList[index].price}">$10.00</div>
+                    <button class="add-to-cart-btn"
+                            th:attr="data-product-name=${productList[index].name}, data-product-price=${productList[index].price}"
+                            onclick="addToCart(this)" >장바구니 담기</button>
+                    <button class="order-btn">주문하기</button>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <!-- 필요에 따라 추가 행을 구성하세요 -->
+</table>
+
+<script>
+    // 전역 배열을 장바구니로 사용
+    let cart = [];
+
+    // 장바구니 담기 함수
+    function addToCart(btn) {
+        productName = btn.getAttribute('data-product-name');
+        productPrice = btn.getAttribute('data-product-price');
+
+        const existingItem = cart.find(item => item.name === productName);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({
+                name: productName,
+                price: productPrice,
+                quantity: 1
+            });
+        }
+        updateCartCount();
+        alert(`"${productName}"이(가) 장바구니에 담겼습니다!`);
+    }
+
+    // 장바구니의 총 상품 개수를 계산해서 업데이트
+    function updateCartCount() {
+        const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+        document.getElementById('cartCount').textContent = totalCount;
+    }
+
+    // 장바구니 보기 함수
+    function showCart() {
+        if (cart.length === 0) {
+            alert("장바구니가 비어 있습니다.");
+            return;
+        }
+
+        let message = "장바구니 목록:\n\n";
+        let totalPrice = 0;
+
+        cart.forEach((item, index) => {
+            const itemTotal = item.price * item.quantity;
+            message += `${index + 1}. ${item.name} | $${item.price} × ${item.quantity} = $${itemTotal.toFixed(2)}\n`;
+            totalPrice += itemTotal;
+        });
+
+        message += `\n총합: $${totalPrice.toFixed(2)}`;
+        alert(message);
+    }
+</script>
+</body>
+</html>

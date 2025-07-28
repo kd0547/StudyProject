@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  mysql:
+    container_name: test_db
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql/conf.d:/etc/mysql/conf.d  # 설정 파일 마운트
+      - ./mysql/data:/var/lib/mysql       # 데이터 지속성

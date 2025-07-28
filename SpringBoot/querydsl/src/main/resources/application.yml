@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: querydsl
+
+    datasource:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3309/study_DB
+      username: study_user
+      password: study_password
+
+    jpa:
+      hibernate:
+        ddl-auto: create
+      show-sql: true
+      properties:
+        hibernate:
+          format_sql: true
+          dialect: org.hibernate.dialect.MySQL8Dialect
+
