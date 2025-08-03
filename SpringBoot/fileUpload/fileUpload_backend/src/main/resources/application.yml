@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: fileUpload
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/devdb
+    username: devuser
+    password: devpass
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # create, create-drop, update, validate, none
+    show-sql: true        # SQL ?? ??
+    properties:
+      hibernate:
+        format_sql: true  # SQL ??? ??
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+    # Optional: ?? ?? ? SQL ?? (src/main/resources/schema.sql ?? ??)
+    sql:
+      init:
+        mode: always
+
+
+logging:
+  level:
+    org.springframework.security: DEBUG
