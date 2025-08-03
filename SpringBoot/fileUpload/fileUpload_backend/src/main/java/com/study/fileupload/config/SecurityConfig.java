@@ -1,8 +1,11 @@
 package com.study.fileupload.config;
 
+import com.study.fileupload.jwt.JwtAccessDeniedHandler;
 import com.study.fileupload.jwt.JwtAuthenticationEntryPoint;
 import com.study.fileupload.jwt.JwtFilter;
 import com.study.fileupload.jwt.JwtProvider;
+import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,24 +14,57 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.security.Key;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final String SECRET_KEY = "replace_this_with_a_very_long_and_secure_secret_key!!";
+
     @Bean
-    public JwtProvider jwtProvider() {
-        return new JwtProvider();
+    public Key createKey() {
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
     @Bean
-    public JwtFilter jwtFilter(JwtProvider jwtProvider) {
+    public JwtProvider jwtProvider() {
+        return new JwtProvider(createKey());
+    }
+
+    @Bean
+    public List<RequestMatcher> requestMatchers() {
+        List<String> excludedPaths = List.of(
+                "/api/v1/auth/login",
+                "/api/v1/auth/logout",
+                "/api/v1/user/signin"
+        );
+
+        return excludedPaths.stream()
+                .map(path -> (RequestMatcher) request -> request.getRequestURI().equals(path))
+                .collect(Collectors.toList());
+
+    }
+
+    @Bean
+    public JwtFilter jwtFilter(
+            JwtProvider jwtProvider) {
         return new JwtFilter(jwtProvider);
     }
 
@@ -48,14 +84,20 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(r -> r.requestMatchers(
-                                "/api/v1/login",
+                                "/api/v1/auth/login",
                                 "/api/v1/logout",
-                                "/api/v1/signin").permitAll()
+                                "/api/v1/user/signin").permitAll()
                 .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter(jwtProvider()),UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex ->
-                        ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
-                .formLogin(AbstractHttpConfigurer::disable);
+                .exceptionHandling(
+                        (e) ->
+                                e.authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                                        .accessDeniedHandler(new JwtAccessDeniedHandler())
+                )
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        ;
 
         return httpSecurity.build();
     }

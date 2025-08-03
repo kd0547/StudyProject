@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/auth")
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
@@ -32,14 +32,14 @@ public class AuthController {
         try{
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getPassword(),
-                            loginRequest.getUsername()
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
                     )
             );
             String jwt = jwtProvider.generateJwt(authentication);
 
             return ResponseEntity.ok().body(
-                    Map.of("token", jwt)
+                    Map.of("authorization", jwt)
             );
 
         } catch (AuthenticationException e) {

@@ -1,5 +1,6 @@
 package com.study.fileupload.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,7 +23,9 @@ public class FileManagementController {
     public void delete() {}
 
     @GetMapping("/list")
-    public void list() {}
+    public ResponseEntity<String> list() {
+        return ResponseEntity.ok().body("HELLO WORLD");
+    }
 
     public void rename() {}
 
