@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef } from "react"
+import React, { useState, useRef,useEffect } from "react"
 import { Folder, File, Upload, FolderPlus, MoreVertical, Download, Trash2, Edit } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { useAuth } from "@/contexts/auth-context"
 
 type Item = {
   type: "folder" | "file"
@@ -23,12 +24,9 @@ type Item = {
   size?: string
   modified: string
 }
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
 
 const initialItems: Item[] = [
-  { type: "folder", name: "Documents", modified: "2024-07-20" },
-  { type: "folder", name: "Images", modified: "2024-07-21" },
-  { type: "file", name: "annual-report.pdf", size: "1.2 MB", modified: "2024-07-22" },
-  { type: "file", name: "project-plan.docx", size: "512 KB", modified: "2024-07-23" },
 ]
 
 export default function FileBrowser() {
@@ -37,14 +35,75 @@ export default function FileBrowser() {
   const [isNewFolderDialogOpen, setIsNewFolderDialogOpen] = useState(false)
   const [newFolderName, setNewFolderName] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { isAuthenticated } = useAuth();
 
   const handleUploadClick = () => {
     fileInputRef.current?.click()
   }
 
+  useEffect(() => {
+    if(isAuthenticated) {
+      const token = localStorage.getItem("token");
+      fetch(`${baseUrl}/api/v1/file/list`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token,
+        },
+      }).then(r => {
+        if(!r.ok) {
+          throw new Error("로그인 실패");
+        }
+        return r.json()
+      }).then(d => {
+        // @ts-ignore
+        const items:Item[] = d.map((data)=> {
+          console.log(data["typeInfo"])
+          const dataInfo: Item = {
+            type: data["typeInfo"],
+            name: data["name"],
+            size: data["size"],
+            modified: data["modified"],
+          }
+          return dataInfo;
+        })
+        setItems(items);
+      }).catch((err)=>{
+        console.log(err)
+      })
+
+    }
+  },[])
+
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (files) {
+      const token = localStorage.getItem("token");
+
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append("files", file);
+      })
+      fetch(`${baseUrl}/api/v1/file/upload`,{
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token,
+        },
+        body: formData,
+
+      })
+          .then((res) => {
+            if(!res.ok) {
+              throw new Error("업로드 실패")
+            }
+            console.error("업로드 성공")
+
+          })
+          .catch((err) => {
+            console.error("업로드 실패:", err)
+          })
+
       const newFiles: Item[] = Array.from(files).map((file) => ({
         type: "file",
         name: file.name,

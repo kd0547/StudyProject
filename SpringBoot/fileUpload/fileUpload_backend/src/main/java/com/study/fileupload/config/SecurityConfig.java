@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -25,7 +26,9 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,27 +42,13 @@ public class SecurityConfig {
     private final String SECRET_KEY = "replace_this_with_a_very_long_and_secure_secret_key!!";
 
     @Bean
-    public Key createKey() {
+    public SecretKey createKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
     @Bean
     public JwtProvider jwtProvider() {
         return new JwtProvider(createKey());
-    }
-
-    @Bean
-    public List<RequestMatcher> requestMatchers() {
-        List<String> excludedPaths = List.of(
-                "/api/v1/auth/login",
-                "/api/v1/auth/logout",
-                "/api/v1/user/signin"
-        );
-
-        return excludedPaths.stream()
-                .map(path -> (RequestMatcher) request -> request.getRequestURI().equals(path))
-                .collect(Collectors.toList());
-
     }
 
     @Bean
@@ -80,13 +69,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain (HttpSecurity httpSecurity) throws Exception {
+
         httpSecurity
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(r -> r.requestMatchers(
+                .authorizeHttpRequests(r -> r
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(
                                 "/api/v1/auth/login",
                                 "/api/v1/logout",
                                 "/api/v1/user/signin").permitAll()
+
                 .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter(jwtProvider()),UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(
@@ -105,7 +98,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:3000"); // 프론트엔드 주소
+        config.setAllowedOrigins(List.of("http://172.17.30.27:3000","http://127.0.0.1:3000")); // 프론트엔드 주소
         config.addAllowedMethod("*"); // 모든 HTTP 메서드 허용 (GET, POST, PUT, DELETE 등)
         config.addAllowedHeader("*"); // 모든 헤더 허용
         config.setAllowCredentials(true); // 인증정보(쿠키/헤더 등) 허용

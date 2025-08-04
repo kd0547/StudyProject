@@ -1,6 +1,8 @@
 package com.study.fileupload.controller;
 
 import com.study.fileupload.dto.LoginRequest;
+import com.study.fileupload.exception.ErrorBlock;
+import com.study.fileupload.exception.ErrorCode;
 import com.study.fileupload.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +45,11 @@ public class AuthController {
             );
 
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorBlock(
+                            ErrorCode.NOTFOUND_USERNAME_PASSWORD,
+                            "not found username or password"));
         }
     }
 }

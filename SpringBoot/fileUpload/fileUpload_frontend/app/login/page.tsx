@@ -24,7 +24,7 @@ export default function LoginPage() {
     const password = (from.querySelector("#password") as HTMLInputElement).value;
 
     try {
-      const response = await fetch(`${baseUrl}/api/v1/login`,
+      const response = await fetch(`${baseUrl}/api/v1/auth/login`,
           {
             method: "POST",
             headers: {
@@ -35,14 +35,17 @@ export default function LoginPage() {
       )
 
       if (!response.ok) {
-        throw new Error("로그인 실패");
+        if(response.status == 401) {
+          throw new Error("로그인 실패");
+        }
       }
 
       const data = await response.json();
-      const token = data["token"];
+      const token = data["authorization"];
       login(token)
 
     } catch (err) {
+      alert("로그인 실패");
 
     }
   }

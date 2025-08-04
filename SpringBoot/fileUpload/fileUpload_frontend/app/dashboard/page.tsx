@@ -11,11 +11,12 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-    }
+      if (!isAuthenticated) {
+          router.push("/login")
+      }else {
+          router.push("/dashboard")
+      }
   }, [isAuthenticated, router])
-
   if (!isAuthenticated) {
     return (
       <div className="flex flex-col gap-6">

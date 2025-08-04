@@ -1,9 +1,13 @@
 package com.study.fileupload.entity;
 
 import com.study.fileupload.dto.SigninRequest;
+import com.study.fileupload.service.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -19,6 +23,17 @@ public class Users {
 
     private String password;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles = new HashSet<>();
+
+    private String rootPath;
+
+    public static Users create(SigninRequest signinRequest,String rootPath) {
+        Users users = create(signinRequest);
+        users.setRootPath(rootPath);
+        return users;
+    }
 
     public static Users create(SigninRequest signinRequest) {
         Users users = new Users();

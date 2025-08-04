@@ -1,5 +1,5 @@
 "use client"
-
+import {useEffect} from "react";
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { File, FolderKanban, LogIn, UserPlus, LogOut } from "lucide-react"
@@ -18,7 +18,6 @@ export default function AppSidebar() {
         { href: "/login", icon: LogIn, label: "Login" },
         { href: "/sign-up", icon: UserPlus, label: "Sign Up" },
       ]
-
   return (
     <aside className="hidden w-14 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5 flex-1">
@@ -53,7 +52,7 @@ export default function AppSidebar() {
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
+                <TooltipTrigger asChild>
                 <Button
                   onClick={logout}
                   variant="ghost"
