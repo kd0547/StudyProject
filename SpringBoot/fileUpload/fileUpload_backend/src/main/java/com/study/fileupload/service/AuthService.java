@@ -21,9 +21,10 @@ public class AuthService implements UserDetailsService {
         Users users =  userRepository.findByEmail(username).orElseThrow(
                 ()-> new UsernameNotFoundException("User not found with username"));
 
-        return User.builder()
-                .username(users.getEmail())
-                .password(users.getPassword())
-                .build();
+        return new CustomUserDetails(
+                users.getId(),
+                users.getEmail(),
+                users.getRoles()
+        );
     }
 }
